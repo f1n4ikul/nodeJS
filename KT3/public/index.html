@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат на WebSocket</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #messages {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        input, button {
+            padding: 10px;
+        }
+        input {
+            width: 70%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Чат</h1>
+    <div id="messages"></div>
+    <div id="usernameSection">
+        <input type="text" id="usernameInput" placeholder="Введите ваше имя">
+        <input type="text" id="colorInput" placeholder="Цвет сообщений (например, #ff5733)">
+        <button onclick="setUsername()">Представиться</button>
+    </div>
+    <div id="chatSection" style="display: none;">
+        <input type="text" id="messageInput" placeholder="Введите сообщение">
+        <button onclick="sendMessage()">Отправить</button>
+    </div>
+
+    <script>
+        const socket = new WebSocket('ws://localhost:3000');
+        const messageInput = document.getElementById('messageInput');
+        const messagesDiv = document.getElementById('messages');
+        const usernameInput = document.getElementById('usernameInput');
+        const colorInput = document.getElementById('colorInput');
+        const usernameSection = document.getElementById('usernameSection');
+        const chatSection = document.getElementById('chatSection');
+
+        function setUsername() {
+            const username = usernameInput.value.trim();
+            const color = colorInput.value.trim() || '#000000';
+            if (username) {
+                socket.send(username + ":" + color);
+                usernameSection.style.display = 'none';
+                chatSection.style.display = 'block';
+            }
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                socket.send(message); 
+                messageInput.value = '';
+            }
+        }
+
+        messageInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        socket.onmessage = (event) => {
+            console.log("Получено сообщение от сервера:", event.data);
+
+            const [message, color] = event.data.split(':');
+            
+            if (message && color) {
+                const messageElement = document.createElement('p');
+                messageElement.textContent = message;
+                messageElement.style.color = color;
+                messagesDiv.appendChild(messageElement);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;  
+            } else {
+                console.error("Не удалось разделить сообщение и цвет. Полученные данные:", event.data);
+            }
+        };
+
+        socket.onerror = (error) => {
+            console.error("Ошибка WebSocket:", error);
+        };
+    </script>
+</body>
+</html>

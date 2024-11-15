@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новости</title>
+</head>
+<body>
+    <h3><%= count %> последних новостей в категории <%= categoryName %></h3>
+    <dl>
+        <% newsItems.forEach(news => { %>
+            <dt><%= news.title %></dt>
+            <dd><%= news.description %></dd>
+        <% }); %>
+    </dl>
+</body>
+</html>
