@@ -71,20 +71,22 @@
         });
 
         socket.onmessage = (event) => {
-            console.log("Получено сообщение от сервера:", event.data);
+    console.log("Получено сообщение от сервера:", event.data);
 
-            const [message, color] = event.data.split(':');
-            
-            if (message && color) {
-                const messageElement = document.createElement('p');
-                messageElement.textContent = message;
-                messageElement.style.color = color;
-                messagesDiv.appendChild(messageElement);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;  
-            } else {
-                console.error("Не удалось разделить сообщение и цвет. Полученные данные:", event.data);
-            }
-        };
+    const parts = event.data.split(':');
+    const message = parts.slice(0, parts.length - 1).join(':'); 
+    const color = parts[parts.length - 1]; 
+
+    if (message) {
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        messageElement.style.color = color;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;  
+    } else {
+        console.error("Не удалось получить сообщение. Полученные данные:", event.data);
+    }
+};
 
         socket.onerror = (error) => {
             console.error("Ошибка WebSocket:", error);
